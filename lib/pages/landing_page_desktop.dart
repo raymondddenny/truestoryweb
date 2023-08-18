@@ -10,14 +10,14 @@ import 'package:text_scroll/text_scroll.dart';
 import 'package:true_story/constants/colors.dart';
 import 'package:websafe_svg/websafe_svg.dart';
 
-class LandingPage extends StatefulWidget {
-  const LandingPage({super.key});
+class LandingPageDekstop extends StatefulWidget {
+  const LandingPageDekstop({super.key});
 
   @override
-  State<LandingPage> createState() => _LandingPageState();
+  State<LandingPageDekstop> createState() => _LandingPageDekstopState();
 }
 
-class _LandingPageState extends State<LandingPage> {
+class _LandingPageDekstopState extends State<LandingPageDekstop> {
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   @override
@@ -30,7 +30,7 @@ class _LandingPageState extends State<LandingPage> {
           Stack(
             children: [
               Image.asset(
-                "assets/image1_orang.jpeg",
+                "assets/images/image1_orang.jpeg",
                 colorBlendMode: BlendMode.screen,
                 height: 350,
               ),
@@ -95,7 +95,7 @@ class _LandingPageState extends State<LandingPage> {
                     style: TextStyle(
                       fontFamily: "VSC",
                       color: ColorConstants.tertiaryColor,
-                      fontSize: 14.0,
+                      fontSize: 16.0,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -110,10 +110,10 @@ class _LandingPageState extends State<LandingPage> {
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.2, top: 6, bottom: 3),
+                    padding: const EdgeInsets.only(left: 80, top: 6, bottom: 3),
                     decoration: const BoxDecoration(color: ColorConstants.tertiaryColor),
                     child: const Text(
-                      "Aku Berjumpah dengan kasih.",
+                      "Aku Berjumpa dengan kasih.",
                       style: TextStyle(
                         fontFamily: 'VSC',
                         fontSize: 13,
@@ -161,13 +161,13 @@ class _LandingPageState extends State<LandingPage> {
           // let me tell you story
           SizedBox(
             width: MediaQuery.of(context).size.width,
-            height: 525,
+            height: 530,
             child: Stack(
               children: [
-                Positioned(
+                const Positioned(
                   top: 10,
-                  left: MediaQuery.of(context).size.width * 0.3,
-                  child: const Text(
+                  left: 130,
+                  child: Text(
                     "let me tell you a...",
                     style: TextStyle(
                       fontFamily: 'Cherry Days',
@@ -177,18 +177,19 @@ class _LandingPageState extends State<LandingPage> {
                   ),
                 ),
                 Positioned(
-                  right: -60,
+                  left: 0,
+                  right: -120,
                   top: 50,
                   child: BounceInDown(
                       duration: const Duration(milliseconds: 1000),
-                      child: Image.asset("assets/logo.png", width: MediaQuery.of(context).size.width)),
+                      child: Image.asset("assets/images/logo.png", width: 200, height: 200)),
                 ),
 
                 // Positioned(
                 //   top: 260,
                 //   left: 20,
                 //   child: Transform.scale(
-                //       scale: 1.8, child: Image.asset("assets/image2.png", width: MediaQuery.of(context).size.width)),
+                //       scale: 1.8, child: Image.asset("assets/images/image2.png", width: MediaQuery.of(context).size.width)),
                 // ),
 
                 Column(
@@ -200,7 +201,7 @@ class _LandingPageState extends State<LandingPage> {
                           Transform.scale(
                             scale: 1.25,
                             child: Image.asset(
-                              "assets/image2_null.png",
+                              "assets/images/image2_null.png",
                               fit: BoxFit.cover,
                               width: MediaQuery.of(context).size.width,
                             ),
@@ -304,7 +305,7 @@ class _LandingPageState extends State<LandingPage> {
             offset: const Offset(30, 0),
             child: Transform.scale(
               scale: 1.35,
-              child: Image.asset("assets/image3.png", width: MediaQuery.of(context).size.width),
+              child: Image.asset("assets/images/image3.png", width: MediaQuery.of(context).size.width),
             ),
           )
         ],
@@ -382,7 +383,7 @@ class FormTrueStory extends StatelessWidget {
             top: -4,
             right: 20,
             child: Image.asset(
-              "assets/logostamp.png",
+              "assets/images/logostamp.png",
               width: 80,
               height: 80,
             ),
