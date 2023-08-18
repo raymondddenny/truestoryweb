@@ -5,21 +5,18 @@ import 'package:animate_do/animate_do.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gsheets/gsheets.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 import 'package:true_story/constants/colors.dart';
-import 'package:websafe_svg/websafe_svg.dart';
+import 'package:true_story/constants/json.dart';
+import 'package:uuid/uuid.dart';
 
-class LandingPageDekstop extends StatefulWidget {
+class LandingPageDekstop extends StatelessWidget {
   const LandingPageDekstop({super.key});
 
-  @override
-  State<LandingPageDekstop> createState() => _LandingPageDekstopState();
-}
-
-class _LandingPageDekstopState extends State<LandingPageDekstop> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController phoneNumberController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,7 +92,7 @@ class _LandingPageDekstopState extends State<LandingPageDekstop> {
                     style: TextStyle(
                       fontFamily: "VSC",
                       color: ColorConstants.tertiaryColor,
-                      fontSize: 16.0,
+                      fontSize: 14.0,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -110,7 +107,7 @@ class _LandingPageDekstopState extends State<LandingPageDekstop> {
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    padding: const EdgeInsets.only(left: 80, top: 6, bottom: 3),
+                    padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.2, top: 6, bottom: 3),
                     decoration: const BoxDecoration(color: ColorConstants.tertiaryColor),
                     child: const Text(
                       "Aku Berjumpa dengan kasih.",
@@ -164,10 +161,10 @@ class _LandingPageDekstopState extends State<LandingPageDekstop> {
             height: 530,
             child: Stack(
               children: [
-                const Positioned(
+                Positioned(
                   top: 10,
-                  left: 130,
-                  child: Text(
+                  left: MediaQuery.of(context).size.width * 0.3,
+                  child: const Text(
                     "let me tell you a...",
                     style: TextStyle(
                       fontFamily: 'Cherry Days',
@@ -177,12 +174,11 @@ class _LandingPageDekstopState extends State<LandingPageDekstop> {
                   ),
                 ),
                 Positioned(
-                  left: 0,
-                  right: -120,
+                  right: -60,
                   top: 50,
                   child: BounceInDown(
                       duration: const Duration(milliseconds: 1000),
-                      child: Image.asset("assets/images/logo.png", width: 200, height: 200)),
+                      child: Image.asset("assets/images/logo.png", width: MediaQuery.of(context).size.width)),
                 ),
 
                 // Positioned(
@@ -298,7 +294,7 @@ class _LandingPageDekstopState extends State<LandingPageDekstop> {
           ),
           const SizedBox(height: 20),
 
-          FormTrueStory(nameController: nameController, phoneNumberController: phoneNumberController),
+          const FormTrueStory(),
           const SizedBox(height: 20),
 
           Transform.translate(
@@ -314,18 +310,19 @@ class _LandingPageDekstopState extends State<LandingPageDekstop> {
   }
 }
 
-class FormTrueStory extends StatelessWidget {
+class FormTrueStory extends HookWidget {
   const FormTrueStory({
     super.key,
-    required this.nameController,
-    required this.phoneNumberController,
   });
-
-  final TextEditingController nameController;
-  final TextEditingController phoneNumberController;
 
   @override
   Widget build(BuildContext context) {
+    final gsheets = GSheets(json);
+    const spreadsheetId = '1X9px38gFV-y5HlPW0-RTN7WT6azK5J8SAqNtVYtroVw'; // Replace with your spreadsheet ID
+
+    final isSubmit = useState(false);
+    final nameController = useTextEditingController();
+    final phoneNumberController = useTextEditingController();
     return Center(
       child: Stack(
         children: [
@@ -363,17 +360,42 @@ class FormTrueStory extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    color: ColorConstants.tertiaryColor,
-                    child: const Text(
-                      "I'M IN!",
-                      style: TextStyle(
-                        fontFamily: 'VSC',
-                        fontSize: 16,
-                        color: ColorConstants.darkBlueColor,
-                      ),
-                    ),
+                  child: InkWell(
+                    onTap: () async {
+                      isSubmit.value = true;
+                      var uuid = const Uuid();
+                      final ss = await gsheets.spreadsheet(spreadsheetId);
+                      final sheet = ss.worksheetByTitle('Sheet1');
+
+                      // get the last row key
+
+                      //  check the last column and row that contain data
+                      await sheet!.values.insertRowByKey(
+                        uuid.v4(),
+                        [
+                          nameController.text,
+                          phoneNumberController.text,
+                        ],
+                      ).then((value) => isSubmit.value = false);
+                    },
+                    child: isSubmit.value
+                        ? Center(
+                            child: LoadingAnimationWidget.inkDrop(
+                            color: ColorConstants.darkBlueColor,
+                            size: 50,
+                          ))
+                        : Container(
+                            padding: const EdgeInsets.all(10),
+                            color: ColorConstants.tertiaryColor,
+                            child: const Text(
+                              "I'M IN!",
+                              style: TextStyle(
+                                fontFamily: 'VSC',
+                                fontSize: 16,
+                                color: ColorConstants.darkBlueColor,
+                              ),
+                            ),
+                          ),
                   ),
                 )
               ],
