@@ -9,6 +9,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:text_scroll/text_scroll.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 import 'package:true_story/constants/colors.dart';
 import 'package:true_story/constants/json.dart';
@@ -323,6 +325,8 @@ class FormTrueStory extends HookWidget {
     final isSubmit = useState(false);
     final nameController = useTextEditingController();
     final phoneNumberController = useTextEditingController();
+    final form = GlobalKey<FormState>();
+
     return Center(
       child: Stack(
         children: [
@@ -333,72 +337,84 @@ class FormTrueStory extends HookWidget {
               color: ColorConstants.whiteColor,
               border: Border.all(color: ColorConstants.darkBlueColor, width: 5),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Let's come and taste!",
-                  style: TextStyle(
-                    fontFamily: 'VSC',
-                    color: ColorConstants.darkBlueColor,
-                    fontSize: 18,
+            child: Form(
+              key: form,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Let's come and taste!",
+                    style: TextStyle(
+                      fontFamily: 'VSC',
+                      color: ColorConstants.darkBlueColor,
+                      fontSize: 18,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                TrueStoryTextField(
-                  textFieldName: 'name',
-                  textFieldHintText: 'Enter your name',
-                  textFieldController: nameController,
-                  keyboardType: TextInputType.name,
-                ),
-                const SizedBox(height: 20),
-                TrueStoryTextField(
-                  textFieldName: 'phone number',
-                  textFieldHintText: 'Enter your phone number',
-                  textFieldController: phoneNumberController,
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: InkWell(
-                    onTap: () async {
-                      isSubmit.value = true;
-                      var uuid = const Uuid();
-                      final ss = await gsheets.spreadsheet(spreadsheetId);
-                      final sheet = ss.worksheetByTitle('Sheet1');
+                  const SizedBox(height: 20),
+                  TrueStoryTextField(
+                    textFieldName: 'name',
+                    textFieldHintText: 'Enter your name',
+                    textFieldController: nameController,
+                    keyboardType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 20),
+                  TrueStoryTextField(
+                    textFieldName: 'phone number',
+                    textFieldHintText: 'Enter your phone number',
+                    textFieldController: phoneNumberController,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: InkWell(
+                      onTap: () async {
+                        if (nameController.text.isEmpty || phoneNumberController.text.isEmpty) {
+                          showTopSnackBar(
+                            Overlay.of(context),
+                            const CustomSnackBar.error(
+                              message: "Please fill the form",
+                            ),
+                          );
+                          return;
+                        }
+                        isSubmit.value = true;
+                        var uuid = const Uuid();
+                        final ss = await gsheets.spreadsheet(spreadsheetId);
+                        final sheet = ss.worksheetByTitle('Sheet1');
 
-                      // get the last row key
+                        // get the last row key
 
-                      //  check the last column and row that contain data
-                      await sheet!.values.insertRowByKey(
-                        uuid.v4(),
-                        [
-                          nameController.text,
-                          phoneNumberController.text,
-                        ],
-                      ).then((value) => isSubmit.value = false);
-                    },
-                    child: isSubmit.value
-                        ? Center(
-                            child: LoadingAnimationWidget.inkDrop(
-                            color: ColorConstants.darkBlueColor,
-                            size: 50,
-                          ))
-                        : Container(
-                            padding: const EdgeInsets.all(10),
-                            color: ColorConstants.tertiaryColor,
-                            child: const Text(
-                              "I'M IN!",
-                              style: TextStyle(
-                                fontFamily: 'VSC',
-                                fontSize: 16,
-                                color: ColorConstants.darkBlueColor,
+                        //  check the last column and row that contain data
+                        await sheet!.values.insertRowByKey(
+                          uuid.v4(),
+                          [
+                            nameController.text,
+                            phoneNumberController.text,
+                          ],
+                        ).then((value) => isSubmit.value = false);
+                      },
+                      child: isSubmit.value
+                          ? Center(
+                              child: LoadingAnimationWidget.inkDrop(
+                              color: ColorConstants.darkBlueColor,
+                              size: 50,
+                            ))
+                          : Container(
+                              padding: const EdgeInsets.all(10),
+                              color: ColorConstants.tertiaryColor,
+                              child: const Text(
+                                "I'M IN!",
+                                style: TextStyle(
+                                  fontFamily: 'VSC',
+                                  fontSize: 16,
+                                  color: ColorConstants.darkBlueColor,
+                                ),
                               ),
                             ),
-                          ),
-                  ),
-                )
-              ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
           Positioned(

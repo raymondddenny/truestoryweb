@@ -12,8 +12,6 @@ import 'package:true_story/secrets/secrets.dart';
 
 void main() async {
   const env = Env("EKUDetydsmQO8qhtyB5pf539L5/pPtMW/7TuNeAMqaw=", "NBnl1xGn52Tgwnn2/H2ppg==");
-
-  debugPrint("env.firebaseApiKey: ${env.firebaseApiKey}");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
       options: FirebaseOptions(

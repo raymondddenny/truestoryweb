@@ -9,10 +9,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:text_scroll/text_scroll.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 import 'package:true_story/constants/colors.dart';
 import 'package:true_story/constants/json.dart';
 import 'package:uuid/uuid.dart';
+import 'package:websafe_svg/websafe_svg.dart';
 
 class LandingPageDekstop extends StatelessWidget {
   const LandingPageDekstop({super.key});
@@ -92,7 +95,7 @@ class LandingPageDekstop extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: "VSC",
                       color: ColorConstants.tertiaryColor,
-                      fontSize: 14.0,
+                      fontSize: 16.0,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -107,7 +110,7 @@ class LandingPageDekstop extends StatelessWidget {
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.2, top: 6, bottom: 3),
+                    padding: const EdgeInsets.only(left: 80, top: 6, bottom: 3),
                     decoration: const BoxDecoration(color: ColorConstants.tertiaryColor),
                     child: const Text(
                       "Aku Berjumpa dengan kasih.",
@@ -161,10 +164,10 @@ class LandingPageDekstop extends StatelessWidget {
             height: 530,
             child: Stack(
               children: [
-                Positioned(
+                const Positioned(
                   top: 10,
-                  left: MediaQuery.of(context).size.width * 0.3,
-                  child: const Text(
+                  left: 130,
+                  child: Text(
                     "let me tell you a...",
                     style: TextStyle(
                       fontFamily: 'Cherry Days',
@@ -174,11 +177,12 @@ class LandingPageDekstop extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  right: -60,
+                  left: 0,
+                  right: -120,
                   top: 50,
                   child: BounceInDown(
                       duration: const Duration(milliseconds: 1000),
-                      child: Image.asset("assets/images/logo.png", width: MediaQuery.of(context).size.width)),
+                      child: Image.asset("assets/images/logo.png", width: 200, height: 200)),
                 ),
 
                 // Positioned(
@@ -323,6 +327,7 @@ class FormTrueStory extends HookWidget {
     final isSubmit = useState(false);
     final nameController = useTextEditingController();
     final phoneNumberController = useTextEditingController();
+    final form = GlobalKey<FormState>();
     return Center(
       child: Stack(
         children: [
@@ -333,72 +338,85 @@ class FormTrueStory extends HookWidget {
               color: ColorConstants.whiteColor,
               border: Border.all(color: ColorConstants.darkBlueColor, width: 5),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Let's come and taste!",
-                  style: TextStyle(
-                    fontFamily: 'VSC',
-                    color: ColorConstants.darkBlueColor,
-                    fontSize: 18,
+            child: Form(
+              key: form,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Let's come and taste!",
+                    style: TextStyle(
+                      fontFamily: 'VSC',
+                      color: ColorConstants.darkBlueColor,
+                      fontSize: 18,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                TrueStoryTextField(
-                  textFieldName: 'name',
-                  textFieldHintText: 'Enter your name',
-                  textFieldController: nameController,
-                  keyboardType: TextInputType.name,
-                ),
-                const SizedBox(height: 20),
-                TrueStoryTextField(
-                  textFieldName: 'phone number',
-                  textFieldHintText: 'Enter your phone number',
-                  textFieldController: phoneNumberController,
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: InkWell(
-                    onTap: () async {
-                      isSubmit.value = true;
-                      var uuid = const Uuid();
-                      final ss = await gsheets.spreadsheet(spreadsheetId);
-                      final sheet = ss.worksheetByTitle('Sheet1');
+                  const SizedBox(height: 20),
+                  TrueStoryTextField(
+                    textFieldName: 'name',
+                    textFieldHintText: 'Enter your name',
+                    textFieldController: nameController,
+                    keyboardType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 20),
+                  TrueStoryTextField(
+                    textFieldName: 'phone number',
+                    textFieldHintText: 'Enter your phone number',
+                    textFieldController: phoneNumberController,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: InkWell(
+                      onTap: () async {
+                        if (nameController.text.isEmpty || phoneNumberController.text.isEmpty) {
+                          showTopSnackBar(
+                            Overlay.of(context),
+                            const CustomSnackBar.error(
+                              message: "Please fill the form",
+                            ),
+                          );
+                          return;
+                        }
 
-                      // get the last row key
+                        isSubmit.value = true;
+                        var uuid = const Uuid();
+                        final ss = await gsheets.spreadsheet(spreadsheetId);
+                        final sheet = ss.worksheetByTitle('Sheet1');
 
-                      //  check the last column and row that contain data
-                      await sheet!.values.insertRowByKey(
-                        uuid.v4(),
-                        [
-                          nameController.text,
-                          phoneNumberController.text,
-                        ],
-                      ).then((value) => isSubmit.value = false);
-                    },
-                    child: isSubmit.value
-                        ? Center(
-                            child: LoadingAnimationWidget.inkDrop(
-                            color: ColorConstants.darkBlueColor,
-                            size: 50,
-                          ))
-                        : Container(
-                            padding: const EdgeInsets.all(10),
-                            color: ColorConstants.tertiaryColor,
-                            child: const Text(
-                              "I'M IN!",
-                              style: TextStyle(
-                                fontFamily: 'VSC',
-                                fontSize: 16,
-                                color: ColorConstants.darkBlueColor,
+                        // get the last row key
+
+                        //  check the last column and row that contain data
+                        await sheet!.values.insertRowByKey(
+                          uuid.v4(),
+                          [
+                            nameController.text,
+                            phoneNumberController.text,
+                          ],
+                        ).then((value) => isSubmit.value = false);
+                      },
+                      child: isSubmit.value
+                          ? Center(
+                              child: LoadingAnimationWidget.inkDrop(
+                              color: ColorConstants.darkBlueColor,
+                              size: 50,
+                            ))
+                          : Container(
+                              padding: const EdgeInsets.all(10),
+                              color: ColorConstants.tertiaryColor,
+                              child: const Text(
+                                "I'M IN!",
+                                style: TextStyle(
+                                  fontFamily: 'VSC',
+                                  fontSize: 16,
+                                  color: ColorConstants.darkBlueColor,
+                                ),
                               ),
                             ),
-                          ),
-                  ),
-                )
-              ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
           Positioned(
@@ -443,9 +461,10 @@ class TrueStoryTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        TextField(
+        TextFormField(
           controller: textFieldController,
           keyboardType: keyboardType,
+          validator: (value) => value!.isEmpty ? 'Please fill the form' : null,
           decoration: InputDecoration(
             fillColor: ColorConstants.quaternaryColor,
             filled: true,
