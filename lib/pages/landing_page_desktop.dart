@@ -393,7 +393,21 @@ class FormTrueStory extends HookWidget {
                             nameController.text,
                             phoneNumberController.text,
                           ],
-                        ).then((value) => isSubmit.value = false);
+                        ).then((value) {
+                          isSubmit.value = false;
+                          showTopSnackBar(
+                            Overlay.of(context),
+                            const CustomSnackBar.success(
+                              backgroundColor: ColorConstants.primaryColor,
+                              message:
+                                  "Thank you sudah mendaftar! Ajak teman-temanmu yang lain juga ya!\nSee you di True Story Youth Serpong 2023!",
+                            ),
+                          );
+
+                          // clear the form
+                          nameController.clear();
+                          phoneNumberController.clear();
+                        });
                       },
                       child: isSubmit.value
                           ? Center(
